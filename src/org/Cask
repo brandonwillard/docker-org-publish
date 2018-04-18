@@ -1,0 +1,8 @@
+(source gnu)
+(source melpa)
+(source org)
+
+(depends-on "cask")
+(depends-on "f")
+(depends-on "s")
+(depends-on "ob-ipython")

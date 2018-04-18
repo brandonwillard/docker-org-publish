@@ -1,0 +1,9 @@
+* Introduction
+
+This repository contains a Docker build capable of [[https://orgmode.org/worg/org-contrib/babel/][org-babel]] evaluation of
+Python 3.6 code and LaTeX/PDF compilation in Ubuntu 17.10.
+
+The Python setup consists of [[https://hub.docker.com/r/continuumio/anaconda3/~/dockerfile/][Anaconda's Python 3.6]], and [[https://orgmode.org/][org-mode]] running
+on a minimal Emacs-25 installation with Elisp dependencies managed by [[https://github.com/cask/cask][Cask]].
+
+There is an example org-babel configuration and Makefile in [[file:src/org/][=src/org=]].
