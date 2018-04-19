@@ -49,9 +49,11 @@ RUN set -ex \
 # Texlive
 RUN set -ex \
   && apt-get install -yqq --no-install-recommends \
+  texlive-plain-generic \
   texlive-latex-base \
-  texlive-pictures \
   texlive-latex-extra \
+  texlive-fonts-recommended \
+  texlive-pictures \
   poppler-utils \
   latexmk
 
@@ -63,7 +65,7 @@ RUN set -ex && \
   ln -s /opt/conda/etc/profile.d/conda.sh /etc/profile.d/conda.sh && \
   echo ". /opt/conda/etc/profile.d/conda.sh" >> ~/.bashrc && \
   echo "conda activate base" >> ~/.bashrc && \
-  conda update -qy -n base --all && \
+  conda update -qy -n base conda && \
   conda install -qy -n base python=3.6.4 pip openblas numpy pandas pandoc ipython jupyter
 
 # Emacs
