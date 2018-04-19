@@ -24,14 +24,7 @@ ENV PATH /opt/conda/bin:/root/.cask/bin:$PATH
 
 RUN set -ex \
   && buildDeps=' \
-  libkrb5-dev \
-  libsasl2-dev \
-  libssl-dev \
-  libffi-dev \
   build-essential \
-  libblas-dev \
-  liblapack-dev \
-  libpq-dev \
   curl \
   grep \
   sed \
@@ -39,10 +32,6 @@ RUN set -ex \
   wget \
   bzip2 \
   ca-certificates \
-  libglib2.0-0 \
-  libxext6 \
-  libsm6 \
-  libxrender1 \
   ' \
   && apt-get update -yqq \
   && apt-get install -yqq --no-install-recommends \
@@ -50,8 +39,8 @@ RUN set -ex \
   git \
   ssh \
   make \
-  apt-utils \
   rsync \
+  apt-utils \
   locales \
   && sed -i 's/^# en_US.UTF-8 UTF-8$/en_US.UTF-8 UTF-8/g' /etc/locale.gen \
   && locale-gen \
@@ -73,7 +62,9 @@ RUN set -ex && \
   rm ~/anaconda.sh && \
   ln -s /opt/conda/etc/profile.d/conda.sh /etc/profile.d/conda.sh && \
   echo ". /opt/conda/etc/profile.d/conda.sh" >> ~/.bashrc && \
-  echo "conda activate base" >> ~/.bashrc
+  echo "conda activate base" >> ~/.bashrc && \
+  conda update -qy -n base --all && \
+  conda install -qy -n base python=3.6.4 pip openblas numpy pandas pandoc ipython jupyter
 
 # Emacs
 RUN set -ex \
