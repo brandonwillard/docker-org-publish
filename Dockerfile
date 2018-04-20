@@ -29,7 +29,6 @@ RUN set -ex \
   grep \
   sed \
   dpkg \
-  wget \
   bzip2 \
   ca-certificates \
   ' \
@@ -59,9 +58,9 @@ RUN set -ex \
 
 # Conda
 RUN set -ex && \
-  wget --quiet https://repo.continuum.io/archive/Anaconda3-5.1.0-Linux-x86_64.sh -O ~/anaconda.sh && \
-  /bin/bash ~/anaconda.sh -b -p /opt/conda && \
-  rm ~/anaconda.sh && \
+  curl -fsSL https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh > ~/miniconda.sh && \
+  /bin/bash ~/miniconda.sh -b -p /opt/conda && \
+  rm ~/miniconda.sh && \
   ln -s /opt/conda/etc/profile.d/conda.sh /etc/profile.d/conda.sh && \
   echo ". /opt/conda/etc/profile.d/conda.sh" >> ~/.bashrc && \
   echo "conda activate base" >> ~/.bashrc && \
@@ -73,7 +72,6 @@ RUN set -ex \
   && apt-get install -yqq --no-install-recommends \
   emacs25-nox \
   && curl -fsSL https://raw.githubusercontent.com/cask/cask/master/go | python
-  # && curl -fsSkL https://raw.github.com/cask/cask/master/go | python
 
 # Tini
 RUN set -ex && \
