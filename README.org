@@ -1,3 +1,16 @@
+#+TITLE: Docker for Org-file Publishing
+#+AUTHOR: Brandon T. Willard
+#+DATE: 2018-04-20
+#+EMAIL: brandonwillard@gmail.com
+
+#+OPTIONS: ^:nil toc:nil tex:t |:t broken-links:t d:nil
+#+SELECT_TAGS: export
+#+EXCLUDE_TAGS: noexport
+
+#+PROPERTY: header-args :eval never-export :exports both :results replace drawer output
+
+[[https://img.shields.io/docker/build/brandonwillard/org-publish.svg]]
+
 * Introduction
 
 This repository contains a Docker build capable of [[https://orgmode.org/worg/org-contrib/babel/][org-babel]] evaluation of
@@ -6,4 +19,67 @@ Python 3.6 code and LaTeX/PDF compilation in Ubuntu 17.10.
 The Python setup consists of [[https://hub.docker.com/r/continuumio/anaconda3/~/dockerfile/][Anaconda's Python 3.6]], and [[https://orgmode.org/][org-mode]] running
 on a minimal Emacs-25 installation with Elisp dependencies managed by [[https://github.com/cask/cask][Cask]].
 
-There is an example org-babel configuration and Makefile in [[file:src/org/][=src/org=]].
+There is an example [[https://orgmode.org/worg/org-contrib/babel/][org-babel]] configuration and [[file:src/org/Makefile][=Makefile=]] in [[file:src/org/][=src/org=]].
+
+
+* Example CI Setup
+
+The Docker image in this repository was created with continuous integration in mind.
+
+For example, the following is a [[circleci.com][CircleCI]] config that uses the image alongside
+the [[https://orgmode.org/worg/org-contrib/babel/][org-babel]] build setup in [[file:src/org/][=src/org=]]:
+#+BEGIN_SRC yaml :eval never :tangle "config.yml"
+version: 2
+jobs:
+  build:
+    docker:
+      - image: brandonwillard/org-publish:latest
+
+    working_directory: ~/org-file-project-repo
+
+    steps:
+
+      - checkout
+
+      - restore_cache:
+         key: conda-{{ checksum "environment.yml" }}
+
+      - run: conda update -qy -n base conda
+
+      # A utility for adding new GitHub releases
+      - run: |
+          conda install -qy -c conda-forge go==1.10
+          go get github.com/tcnksm/ghr
+
+      # Our project/repo has a conda env specified in an 'environment.yml' file
+      - run: conda env create --force -q -f environment.yml -n build-env
+
+      - save_cache:
+         key: conda-{{ checksum "environment.yml" }}
+         paths:
+           - "/opt/conda"
+
+      # Activate our conda env and compile our Org file to PDF.
+      - run: |
+          . /opt/conda/etc/profile.d/conda.sh
+          conda activate build-env
+          make -C src/org -f Makefile the-resulting.pdf
+
+      # Save the resulting PDF and any images produced.
+      - store_artifacts:
+          path: ~/org-file-project-repo/output/the-resulting.pdf
+      - store_artifacts:
+          path: ~/org-file-project-repo/figures
+
+      # Create the GitHub release (needs a tag from `git describe --tags`).
+      # XXX: You'll need to create a GitHub API token environment variable
+      # (named 'GITHUB_TOKEN') in the CircleCI project.
+      - deploy:
+          command: /root/go/bin/ghr -t $GITHUB_TOKEN -u $CIRCLE_PROJECT_USERNAME -r $CIRCLE_PROJECT_REPONAME -replace -prerelease `git describe --tags` output/the-resulting.pdf
+
+workflows:
+  version: 2
+  build-and-deploy:
+    jobs:
+      - build
+#+END_SRC
